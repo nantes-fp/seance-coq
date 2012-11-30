@@ -1,0 +1,411 @@
+\documentclass[9pt]{beamer}
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+
+\usepackage{verbatim}
+\usepackage{listings}
+\lstset{
+  upquote=true,
+  columns=flexible,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  morekeywords={Theorem,Definition,Proof,Qed,Fixpoint,Inductive,Example}
+}
+
+\usetheme{Warsaw}
+\setbeamertemplate{navigation symbols}{} % Supprimer symboles de navigation
+
+\title{Séminaire Coq}
+\subtitle{Introduction et utilisation basique}
+\author{Maxime Folschette}
+\date{27 novembre 2012}
+
+\newcommand{\todo}[1]{\textcolor{red}{[[#1]]}}
+
+\newenvironment{ex}[1][Exemple]{\begin{exampleblock}{#1}}{\end{exampleblock}}
+\newenvironment{warn}[1][Attention]{\begin{alertblock}{#1}}{\end{alertblock}}
+\newenvironment{code}[1][Code]{\begin{block}{#1}}{\end{block}}
+
+\newcommand{\coq}[1]{\texttt{\textcolor{blue}{#1}}}
+\newcommand{\defi}[1]{\textbf{#1}}
+
+
+
+\begin{document}
+
+\begin{frame}[plain]
+\institute{\url{http://www.irccyn.ec-nantes.fr/~folschet/coq/exos1-vide.v}}
+\titlepage
+\institute{}
+\end{frame}
+
+\begin{frame}
+\frametitle{Coq = assistant de \textcolor{red}{preuves} formelles}
+
+\defi{Preuve} = Démonstration\\
+~\phantom{\defi{Preuve}}= Raisonnement propre à établir une vérité\\
+~\phantom{\defi{Preuve}= }à partir de propositions initiales
+\begin{ex}
+  Les chats ont des poils et Socrate est un chat, donc Socrate a des poils.
+\end{ex}
+
+\pause
+\only<2>{
+\begin{ex}
+Tous ceux qui écoutent du Black Metal ont les cheveux longs.\\J'ai les cheveux longs donc j'écoute du Black Metal.
+\end{ex}
+}
+
+\pause
+\only<1,3->{
+\begin{warn}[Exemple de raisonnement faux]
+Tous ceux qui écoutent du Black Metal ont les cheveux longs.\\J'ai les cheveux longs donc j'écoute du Black Metal.
+\end{warn}
+}
+
+\begin{ex}
+Je suis à Londres $\Rightarrow$ Je suis en Angleterre\\\quad
+$\nLeftrightarrow$ Je ne suis pas à Londres $\Rightarrow$ Je ne suis pas en Angleterre
+\end{ex}
+
+Démonstration par récurrence, par l'absurde, ...
+
+\end{frame}
+
+
+
+\newcommand{\ctpinform}{6}
+\newcommand{\ctpform}{3}
+\newcommand{\N}{\mathbb{N}}
+
+\begin{frame}[t]
+\frametitle{Coq = assistant de preuves \textcolor{red}{formelles}}
+
+Distinction formel / informel
+
+\pause
+\defi{Preuve informelle} = Lisible par un être humain
+\only<-\ctpinform>{
+\begin{ex}[MQ : Il y a autant d'entiers naturels pairs que d'entiers naturels impairs.]
+\begin{enumerate}
+\pause
+  \item À chaque entier naturel pair, on peut associer son successeur qui est impair. \uncover<\ctpinform->{\textcolor{red}{(Pourquoi ?)}}\\
+        De même, à chaque entier naturel impair, on peut associer son prédécesseur qui est pair. \uncover<\ctpinform->{\textcolor{red}{(Pourquoi ?)}}
+\pause
+  \item À chaque entier naturel pair, on peut associer son successeur qui est impair. \uncover<\ctpinform->{\textcolor{red}{(Pourquoi ?)}}\\
+        De même pour tout entier naturel impair. \uncover<\ctpinform->{\textcolor{red}{(Vraiment ?)}}
+\pause
+  \item C'est trivial. \uncover<\ctpinform->{\textcolor{red}{(Alors montrez-le.)}}
+\end{enumerate}
+\end{ex}
+}
+
+\pause[\ctpinform]
+\pause
+\defi{Preuve formelle} = Objet mathématique, lisible par une machine 
+\begin{ex}[MQ : Il y a autant d'entiers naturels pairs que d'entiers naturels impairs.]
+\pause
+{}[ MQ : $\exists f : P \rightarrow Q \text{ bijective, avec : }$\\$P = \{n \in \N \mid \exists k \in \N, n = 2k\} \wedge Q = \{m \in \N \mid \exists k \in \N, m = 2k+1\}$ ]
+
+\uncover<11->{
+Soit $n \in P$. Alors $\exists k \in \N, n = 2k$, ainsi $n+1 = 2k+1 \in Q$.
+
+Soit $m \in Q$. Alors $\exists l \in \N, m = 2l+1$, ainsi $m-1 = 2l \in P$.
+}
+
+\uncover<12->{
+[ Montrer aussi que $m \geq 1$ sans quoi on pourrait avoir $m-1 < 0$. ]
+
+[ Pour cela, montrer que $Q$ est minoré et trouver son minimum. ]
+}
+
+\pause
+Soient :
+$f = \left\{\begin{array}{ccc}
+  P & \rightarrow & Q \\
+  n & \rightarrow & n + 1
+\end{array}\right.$
+et
+$g = \left\{\begin{array}{ccc}
+  Q & \rightarrow & P \\
+  m & \rightarrow & m - 1
+\end{array}\right.$
+
+\pause
+Soit $m \in Q$. On a : $f \circ g (m) = f(g(m)) = f(m - 1) = (m - 1) + 1 = m$.
+
+Soit $n \in P$. On a : $g \circ f (n) = g(f(n)) = g(n + 1) = (n + 1) - 1 = n$.
+
+Ainsi, $f$ est une bijection de $P$ dans $Q$ (de réciproque $g$). CQFD.
+\end{ex}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Coq = \textcolor{red}{assistant} de preuves formelles}
+
+\defi{Assistant} = Coq ne crée pas de démonstration, il se contente de vérifier celle que vous écrivez.
+
+\bigskip
+Coq est le correcteur de khôle qui hurle dès que vous essayez de l'embrouiller.
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Applications de Coq}
+
+\begin{itemize}
+ \item Démonstration de théorèmes complexes
+\begin{itemize}
+  \item c'est rare car la formulation est difficile
+  \item mais de plus en plus fréquent pour s'assurer de la véracité d'une preuve
+  \item et c'est enrichissant pour la communauté scientifique
+\end{itemize}
+
+\begin{ex}
+Théorème des quatre couleurs
+\end{ex}
+
+\bigskip
+\pause
+ \item Preuve de programmes
+\begin{itemize}
+  \item s'assurer qu'un programme possède le comportement voulu
+  \item s'assurer qu'un comportement indésirable n'est pas possible
+  \item de plus en plus fréquent
+\end{itemize}
+\begin{ex}
+Électronique embarquée et critique (voiture, avion, navettes…)
+\end{ex}
+
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Gallina}
+
+Le langage de définitions de Coq est \textbf{Gallina} (inspiré d'OCaml). Il permet de définir :
+\begin{itemize}
+  \item des fonctions $\rightarrow$ sur lesquelles porteront les preuves,
+  \item des propositions $\rightarrow$ qui pourront servir d'énoncés de théorèmes,
+  \item de lancer une démonstration...
+\end{itemize}
+
+\pause
+\medskip
+C'est un langage purement fonctionnel
+\begin{itemize}
+  \item Vraiment purement fonctionnel
+  \item Transparence référentielle (pas d'exception, pas d'E/S...)
+  \item[$\Rightarrow$] Permet d'écrire des maths
+\end{itemize}
+
+\end{frame}
+
+
+
+\newcommand{\bs}{\symbol{92}}
+\begin{frame}
+\frametitle{Les propositions}
+
+Les propositions permettent d'écrire des assertions mathématiques.
+
+\medskip
+Les symboles :
+\begin{itemize}
+  \item \texttt{/\bs}, \texttt{\bs/} : conjonction, disjonction
+  \item \texttt{->}, \texttt{<->} : implication, équivalence
+  \item \texttt{=}, \texttt{<>} : égalité, inégalité
+  \item \texttt{<}, \texttt{<=}, \texttt{>}, \texttt{>=}, : comparaisons (entiers naturels seulement)
+\end{itemize}
+
+\medskip
+Contrairement aux fonctions, elles sont figées (non simplifiables).
+
+\pause
+\begin{warn}[]
+\textbf{Elles peuvent représenter des assertions fausses !} Une proposition, contrairement à un théorème, n'est pas suivie d'une démonstration et peut énoncer n'importe quoi de syntaxiquement correct.
+\end{warn}
+
+\end{frame}
+
+
+
+\begin{frame}[containsverbatim]
+\frametitle{Les théorèmes et démonstrations}
+
+\begin{columns}[t]
+  \begin{column}{5cm}
+    \begin{code}[Définition d'un théorème]
+    \begin{lstlisting}
+Theorem <nom> : <proposition>.
+Proof.
+  <tactiques et conclusions>
+Qed.
+    \end{lstlisting}
+    \end{code}
+  \end{column}
+  \begin{column}{5cm}
+    \begin{code}[Environnement de preuves]
+    \begin{lstlisting}
+  Contexte
+  ==================
+   Objectif actif
+
+Objectifs en attente
+    \end{lstlisting}
+    \end{code}
+  \end{column}
+\end{columns} 
+
+\begin{itemize}
+  \item Définir un théorème lance l'environnement de preuves.
+  \item L'environnement de preuves contient :
+  \begin{itemize}
+   \item un ensemble d'objectifs (propositions à prouver pour résoudre la démonstration) --- un seul objectif est actif à la fois,
+   \item un contexte (hypothèses).
+  \end{itemize}
+  \item Au départ, le seul objectif est l'énoncé du théorème et le contexte est vide.
+  \item Les tactiques permettent de résoudre la démonstration. Elles peuvent avoir trois effets :
+  \begin{itemize}
+    \item modifier l'objectif courant,
+    \item créer un nouvel objectif (rajouter une étape dans la démonstration),
+    \item supprimer l'objectif courant (résoudre l'étape en cours).
+  \end{itemize}
+  \item On peut clore une démonstration (\coq{Qed}\texttt{.}) lorsqu'il ne reste plus d'objectif.
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Définitions récursives}
+
+\defi{Type paramétré} = Type dépendant d'un autre type.
+\begin{ex}[Une \texttt{option} sur le type \texttt{X} est :]
+\begin{itemize}
+  \item soit un élément qui ne contient aucune valeur $\rightarrow$ \texttt{None}
+  \item soit un élément qui contient une valeur de type \texttt{X} $\rightarrow$ \texttt{Some x}
+\end{itemize}
+\end{ex}
+
+\pause
+\defi{Type récursif} = Type qui fait référence à lui-même.
+\begin{ex}[Un entier naturel \texttt{nat} (arithmétique de Peano) est :]
+\begin{itemize}
+  \item soit l'élément nul $\rightarrow$ \texttt{O}
+  \item soit le successeur d'un entier naturel $\rightarrow$ \texttt{S n}
+\end{itemize}
+\end{ex}
+
+\pause
+Les listes :
+\begin{ex}[Une liste d'éléments de type \texttt{X} (\texttt{list X}) est :]
+\begin{itemize}
+  \item soit la liste vide $\rightarrow$ \texttt{[]}
+  \item soit un élément de \texttt{X} (tête) et une liste de \texttt{X} (queue) $\rightarrow$ \texttt{h :: t}
+\end{itemize}
+\end{ex}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Fonctions récursives}
+
+\defi{Fonction récursive} = Fonction qui fait référence à elle-même.
+
+\medskip
+$\rightarrow$ Problème : quid des fonctions récursives qui ne terminent pas ?\\
+Quel résultat, Quel type ?\\
+\quad$\Rightarrow$ Mathématiquement non défini
+
+\pause
+\medskip
+$\rightarrow$ Solution : forcer la terminaison\\
+\defi{Décroissance structurelle} = Une fonction ne peut s'appeler elle-même qu'avec au moins un argument strictement inférieur structurellement\\
+\defi{$X$ est structurellement inférieur à $Y$} = On peut construire $Y$ à partir de $X$\\
+\quad$\Rightarrow$ On finit toujours dans un cas dégénéré
+
+\pause
+\begin{ex}
+La fonction \texttt{length} s'appelle elle-même sur la queue de la liste, qui est structurellement plus petite. (On peut construire la liste de départ à partir de sa tête et de sa queue.)
+\end{ex}
+
+
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Preuves par récurrence}
+
+\begin{ex}[Récurrence sur $\N$ (scolaire)]
+Si on parvient à montrer $P_0$ et $\forall n \in \N, P_n \Rightarrow P_{n+1}$, alors on a : $\forall n \in \N, P_n$.
+\\Autrement dit : 
+$(P_0 \wedge \forall n \in \N, P_n \Rightarrow P_{n+1}) \Rightarrow \forall n \in \N, P_n$.
+\end{ex}
+
+\pause
+\begin{code}[Récurrence sur “\texttt{nat}” (structurelle)]
+$P(\texttt{O}) \Rightarrow
+  (\forall \texttt{n} \in \texttt{nat}, P(\texttt{n}) \Rightarrow P(\texttt{S n})) \Rightarrow
+  \forall \texttt{n} \in \texttt{nat}, P(\texttt{n})$
+\end{code}
+
+\begin{code}[Récurrence sur “\texttt{list X}” (structurelle)]<3>
+$P(\texttt{[]}) \Rightarrow
+  (\forall \texttt{x} \in \texttt{X}, \forall \texttt{l} \in \texttt{list X}, P(\texttt{l}) \Rightarrow P(\texttt{x :: l})) \Rightarrow
+  \forall \texttt{l} \in \texttt{list X}, P(\texttt{l})$
+\end{code}
+
+avec associativité à droite de “$\Rightarrow$” :
+\\\quad$A \Rightarrow B \Rightarrow C$
+\quad$\equiv\quad A \Rightarrow (B \Rightarrow C)$
+\quad$\equiv\quad (A \wedge B) \Rightarrow C$
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Un petit mot sur Curry-Howard}
+
+\huge
+
+\begin{center}
+\texttt{H : P -> Q}
+
+\pause
+\texttt{f : P -> Q}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}
+\institute{\url{http://www.irccyn.ec-nantes.fr/~folschet/coq/}}
+\frametitle{Références et Licence}
+\maketitle
+
+\url{http://coq.inria.fr/}
+
+\url{http://www.cis.upenn.edu/~bcpierce/sf/}
+
+\url{http://www.coursera.org/course/progfun}
+
+\url{http://www.labri.fr/perso/casteran/CoqArt/index.html}
+
+\medskip
+Licence : Beerware, réutilisation encouragée
+
+\end{frame}
+
+\end{document}
