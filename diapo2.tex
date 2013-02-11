@@ -1,0 +1,272 @@
+\documentclass[9pt]{beamer}
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+
+\usepackage{verbatim}
+\usepackage{listings}
+\lstset{
+  upquote=true,
+  columns=flexible,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  morekeywords={Theorem,Definition,Proof,Qed,Fixpoint,Inductive,Example}
+}
+
+\usetheme{Warsaw}
+\setbeamertemplate{navigation symbols}{} % Supprimer symboles de navigation
+
+\title{Séminaire Coq}
+\subtitle{Introduction et utilisation basique}
+\author{Maxime Folschette}
+\date{14 février 2013}
+
+\newcommand{\todo}[1]{\textcolor{red}{[[#1]]}}
+
+\newenvironment{ex}[1][Exemple]{\begin{exampleblock}{#1}}{\end{exampleblock}}
+\newenvironment{warn}[1][Attention]{\begin{alertblock}{#1}}{\end{alertblock}}
+\newenvironment{code}[1][Code]{\begin{block}{#1}}{\end{block}}
+
+\newcommand{\coq}[1]{\texttt{\textcolor{blue}{#1}}}
+\newcommand{\defi}[1]{\textbf{#1}}
+
+\newcommand{\bs}{\symbol{92}}
+\newcommand{\ctpinform}{6}
+\newcommand{\ctpform}{3}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+
+
+
+\begin{document}
+
+\begin{frame}[plain]
+\titlepage
+\end{frame}
+
+
+
+\begin{frame}[containsverbatim]
+\frametitle{Définitions}
+
+\begin{code}[Définition inductive $\rightsquigarrow$ Nouveaux types]
+\begin{lstlisting}
+Inductive bool : Type :=
+  | true : bool
+  | false : bool.
+\end{lstlisting}
+\end{code}
+
+\begin{code}[Définition avec pattern matching $\rightsquigarrow$ Déconstruction]
+\begin{lstlisting}
+Definition negb (b:bool) : bool :=
+  match b with
+    | true => false
+    | false => true
+  end.
+\end{lstlisting}
+\end{code}
+
+\end{frame}
+
+
+
+\begin{frame}[containsverbatim]
+\frametitle{Théorèmes et démonstrations}
+
+\begin{code}[Définition d'un théorème et écriture de sa preuve]
+\begin{lstlisting}
+Theorem <nom> : <proposition>.
+Proof.
+  <tactiques et conclusions>
+Qed.
+\end{lstlisting}
+\end{code}
+
+\begin{code}[Environnement de preuves]
+\begin{lstlisting}[]
+  Contexte (variables et hypotheses)
+  ==================
+    Objectif actif
+
+Objectifs en attente
+...
+\end{lstlisting}
+\end{code}
+
+$\Rightarrow$ On cherche à prouver l'objectif actif avant de passer aux autres.
+
+\end{frame}
+
+
+
+\begin{frame}[c]
+\frametitle{Propositions et preuves}
+
+\defi{Proposition} = Assertion, « phrase » non simplifiable.
+\begin{ex}
+\begin{itemize}
+  \item $2 < 5$
+  \item $\forall x \in \R, x^2 \geq 0$
+  \item $\forall x \in \R, \exists y_1, y_2 \in \R, y_1 \not= y_2 \wedge y_1^2 = y_2^2 = x$
+  \item $5 < 2$
+\end{itemize}
+\end{ex}
+
+\pause
+\bigskip
+\defi{Preuve} = Succession de tactiques pour résoudre chaque objectif.
+\begin{ex}
+\begin{itemize}
+  \item \coq{simpl} $\rightarrow$ Simplifier l'objectif courant.
+  \item \coq{reflexivity} $\rightarrow$ Résoudre l'objectif courant s'il a la forme : $X = X$.
+  \item \coq{intros}\texttt{ a} $\rightarrow$ On pose $a$ (pour répondre à $\forall a, ...$).
+  \item \coq{intros}\texttt{ H} $\rightarrow$ On suppose $H$ (pour répondre à $H \Rightarrow ...$).
+  \item \coq{rewrite}\texttt{ H} $\rightarrow$ Si $H: x = y$, remplacer tout $x$ par $y$.
+  \item \coq{apply}\texttt{ H} $\rightarrow$ Conclure en appliquant $H$.
+\end{itemize}
+\end{ex}
+
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Définitions récursives}
+
+\defi{Type paramétré} = Type dépendant d'un autre type.
+\begin{ex}[\texttt{option X} --- Une option sur le type \texttt{X} est :]
+\begin{itemize}
+  \item soit un élément qui ne contient aucune valeur $\rightsquigarrow$ \texttt{None}
+  \item soit un élément qui contient une valeur de type \texttt{X} $\rightsquigarrow$ \texttt{Some x}
+\end{itemize}
+\end{ex}
+
+\pause
+\medskip
+\defi{Type récursif} = Type qui fait référence à lui-même.
+\begin{ex}[\texttt{nat} --- Un entier naturel \texttt{nat} (dans l'arithmétique de Peano) est :]
+\begin{itemize}
+  \item soit l'élément nul $\rightsquigarrow$ \texttt{O}
+  \item soit le successeur d'un entier naturel $\rightsquigarrow$ \texttt{S n}
+\end{itemize}
+\end{ex}
+
+\pause
+\medskip
+Exemple de type récursif paramétré : les listes.
+\begin{ex}[\texttt{list X} --- Une liste d'éléments de type \texttt{X} est :]
+\begin{itemize}
+  \item soit la liste vide $\rightsquigarrow$ \texttt{[]}
+  \item soit un élément de \texttt{X} (tête) et une liste de \texttt{X} (queue) $\rightsquigarrow$ \texttt{h :: t}
+\end{itemize}
+\end{ex}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Fonctions récursives}
+
+\defi{Fonction récursive} = Fonction qui fait référence à elle-même.
+
+\medskip
+$\rightarrow$ Problème : quid des fonctions récursives qui ne terminent pas ?\\
+Quel résultat ? Quel type ?
+\begin{warn}[]
+\centering$\Rightarrow$ Mathématiquement non défini
+\end{warn}
+
+\pause
+\medskip
+$\rightarrow$ Solution : forcer la terminaison\\
+\defi{Décroissance structurelle} = Une fonction ne peut s'appeler elle-même qu'avec au moins un argument strictement inférieur structurellement\\
+\defi{$X$ est structurellement inférieur à $Y$} = On peut construire $Y$ à partir de $X$\\
+\begin{ex}[]
+\centering$\Rightarrow$ On finit toujours dans un cas dégénéré
+\end{ex}
+
+\pause
+\begin{ex}
+La fonction \texttt{length} s'appelle elle-même sur la queue de la liste, qui est structurellement plus petite. (On peut construire la liste de départ à partir de sa tête et de sa queue.)
+\end{ex}
+
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Preuves par récurrence}
+
+\begin{ex}[Récurrence sur $\N$ (scolaire)]
+Si on parvient à montrer :
+\begin{itemize}
+ \item $P_0$,
+ \item $\forall n \in \N, P_n \Rightarrow P_{n+1}$,
+\end{itemize}
+Alors on a :
+\begin{itemize}
+ \item $\forall n \in \N, P_n$.
+\end{itemize}
+Autrement dit : 
+$(P_0 \wedge \forall n \in \N, P_n \Rightarrow P_{n+1}) \Rightarrow \forall n \in \N, P_n$.
+\end{ex}
+
+\pause
+\begin{code}[Récurrence sur “\texttt{nat}” (structurelle)]
+$P(\texttt{O}) \Rightarrow
+  (\forall \texttt{n} \in \texttt{nat}, P(\texttt{n}) \Rightarrow P(\texttt{S n})) \Rightarrow
+  \forall \texttt{n} \in \texttt{nat}, P(\texttt{n})$
+\end{code}
+
+\begin{code}[Récurrence sur “\texttt{list X}” (structurelle)]<3>
+$P(\texttt{[]}) \Rightarrow
+  (\forall \texttt{x} \in \texttt{X}, \forall \texttt{l} \in \texttt{list X}, P(\texttt{l}) \Rightarrow P(\texttt{x :: l})) \Rightarrow
+  \forall \texttt{l} \in \texttt{list X}, P(\texttt{l})$
+\end{code}
+
+avec associativité à droite de “$\Rightarrow$” :
+\\\quad$A \Rightarrow B \Rightarrow C$
+\quad$\equiv\quad A \Rightarrow (B \Rightarrow C)$
+\quad$\equiv\quad (A \wedge B) \Rightarrow C$
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Un petit mot sur Curry-Howard}
+
+\huge
+
+\begin{center}
+\texttt{H : P -> Q}
+
+\pause
+\texttt{f : P -> Q}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}
+\institute{\url{https://github.com/nantes-fp/seance-coq}}
+\frametitle{Références et Licence}
+\maketitle
+
+\url{http://coq.inria.fr/}
+
+\url{http://www.cis.upenn.edu/~bcpierce/sf/}
+
+\url{http://www.coursera.org/course/progfun}
+
+\url{http://www.labri.fr/perso/casteran/CoqArt/index.html}
+
+\rule{5cm}{.1pt}
+
+Licence Beerware / CC0 : si les termes de la licence Beerware ne peuvent s'appliquer ou semblent trop restrictifs, ceux de la licence CC0 s'appliquent.
+Réutilisation encouragée.
+
+\end{frame}
+
+\end{document}
